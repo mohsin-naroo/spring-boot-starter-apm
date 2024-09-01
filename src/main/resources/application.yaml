@@ -1,0 +1,53 @@
+# webapp settings
+spring:
+  application:
+    name: APM
+
+# tomcat settings
+server:
+  servlet:
+    context-path: /apm
+
+# actuator settings
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    resource-attributes:
+      service.name: ${spring.application.name:apm}
+      service.namespace: ${spring.application.env:test}
+      service.instance.id: ${HOSTNAME:${COMPUTERNAME:localhost}}
+  otlp:
+    tracing:
+      endpoint: http://localhost:44318/v1/traces
+    metrics:
+      export:
+        enabled: true
+        url: http://localhost:44318/v1/metrics
+    logs:
+      export:
+        enabled: true
+        url: http://localhost:44317
+#        url: http://localhost:44318/v1/logs
+
+# logging settings
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}] ${HOSTNAME}"
+  file:
+    name: ${webapp.log.file:target/apm.log}
+  level:
+    '[org.springframework.web.servlet.DispatcherServlet]': debug
+    '[org.springframework.web.client.RestTemplate]': debug
