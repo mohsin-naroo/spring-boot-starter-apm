@@ -5,3 +5,5 @@ Spring Boot starter web application to send traces, metrics and logs in Otel(Ope
 - [Simplified: APM - Application Performance Monitoring for Spring Boot Application with OpenTelemetry](https://www.linkedin.com/pulse/simplified-apm-application-performance-monitoring-spring-mohsin-ali-halgf)
 - [Simplified: APM - Setup OpenTelemetry Collector, Jaeger, Prometheus, Grafana and Loki (Part Two)](https://www.linkedin.com/pulse/simplified-apm-setup-opentelemetry-collector-jaeger-mohsin-ali-egysf)
 - [Simplified: APM - Spring Boot send traces/metrics/logs in Otel format (Part Three)](https://www.linkedin.com/pulse/simplified-apm-spring-boot-send-tracesmetricslogs-otel-mohsin-ali-fraqf)
+
+- [AddOn: Trace JDBC calls with Spring AOP](https://www.linkedin.com/pulse/addon-trace-jdbc-calls-spring-aop-mohsin-ali-ikq5f/)
