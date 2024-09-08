@@ -45,9 +45,10 @@ management:
 # logging settings
 logging:
   pattern:
-    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}] ${HOSTNAME}"
+    level: "%5p ${HOSTNAME}"
   file:
     name: ${webapp.log.file:target/apm.log}
   level:
+    sql: debug
     '[org.springframework.web.servlet.DispatcherServlet]': debug
     '[org.springframework.web.client.RestTemplate]': debug

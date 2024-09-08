@@ -29,7 +29,7 @@ import io.opentelemetry.sdk.resources.Resource;
 @Configuration
 public class OtlpLogConfiguration {
 
-    @ConditionalOnProperty(name = "management.otlp.logs.export.enabled", matchIfMissing = false)
+    @ConditionalOnProperty(name = "management.otlp.logs.export.enabled", havingValue = "true", matchIfMissing = false)
     @Bean
     public LoggerProvider loggerProvider(Resource resource, @Value("${management.otlp.logs.export.url}") String url) {
         LogRecordExporter logExporter = OtlpGrpcLogRecordExporter.builder()
@@ -42,6 +42,11 @@ public class OtlpLogConfiguration {
                 .setResource(resource)
                 .addLogRecordProcessor(logProcessor)
                 .build();
+        initOtelLogackAppender(loggerProvider);
+        return loggerProvider;
+    }
+
+    private void initOtelLogackAppender(LoggerProvider loggerProvider) {
         if (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) instanceof ch.qos.logback.classic.Logger rootLogger
                 && rootLogger.getAppender("FILE") instanceof RollingFileAppender<ILoggingEvent> fileAppender) {
             OtelLogackAppender appender = new OtelLogackAppender(loggerProvider, fileAppender.getEncoder());
@@ -49,7 +54,6 @@ public class OtlpLogConfiguration {
             appender.start();
             rootLogger.addAppender(appender);
         }
-        return loggerProvider;
     }
 
     public static class OtelLogackAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
