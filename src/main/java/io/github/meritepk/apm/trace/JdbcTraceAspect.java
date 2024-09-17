@@ -25,6 +25,7 @@ public class JdbcTraceAspect {
 
     private static final String DB_STATEMENT = "db.statement";
     private static final String DB_STATEMENT_BATCH = "db.statement.batch";
+    private static final String DB_STATEMENT_PARAMS = "db.statement.params";
     private static final String ERROR = "error";
 
     private final Logger logger = LoggerFactory.getLogger(JdbcTraceAspect.class);
@@ -152,6 +153,9 @@ public class JdbcTraceAspect {
                     context.batch++;
                     retVal = method.invoke(context.target, args);
                 } else {
+                    if (args != null && args.length > 1 && context.batch == 0 && method.getName().startsWith("set")) {
+                        addParameter(context, method, args);
+                    }
                     retVal = method.invoke(context.target, args);
                 }
                 return retVal;
@@ -159,6 +163,17 @@ public class JdbcTraceAspect {
                 throw ex.getTargetException();
             }
         };
+    }
+
+    private void addParameter(JdbcTraceContext context, Method method, Object[] args) {
+        if (context.params == null) {
+            context.params = new StringBuilder();
+        }
+        if (method.getName().equals("setNull")) {
+            context.params.append(args[0]).append(':').append("null").append(';');
+        } else {
+            context.params.append(args[0]).append(':').append(args[1]).append(';');
+        }
     }
 
     private Object proxyCallableStatement(CallableStatement statement, String sql) {
@@ -175,6 +190,9 @@ public class JdbcTraceAspect {
         }
         if (context.batch > 0) {
             span.tag(DB_STATEMENT_BATCH, context.batch);
+        }
+        if (context.params != null && context.params.length() > 0) {
+            span.tag(DB_STATEMENT_PARAMS, context.params.toString());
         }
         span = span.start();
         try (SpanInScope scope = tracer.withSpan(span)) {
@@ -201,6 +219,7 @@ public class JdbcTraceAspect {
         private String type;
         private String sql;
         private int batch;
+        private StringBuilder params;
 
         public static JdbcTraceContext of(Object target, String type, String sql) {
             JdbcTraceContext call = new JdbcTraceContext();
