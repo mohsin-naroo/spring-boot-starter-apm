@@ -1,0 +1,42 @@
+receivers:
+  otlp:
+    protocols:
+      # gRPC endpoint to receive traces, metrics, logs
+      grpc:
+        endpoint: 0.0.0.0:44317
+      # http endpoint to receive traces, metrics, logs
+      http:
+        endpoint: 0.0.0.0:44318
+
+processors:
+  batch:
+
+exporters:
+  # export traces to jaeger in otel format at gRPC endpoint
+  otlp/jaeger:
+    endpoint: localhost:4317
+    tls:
+      insecure: true
+  # export metrics to prometheus
+  prometheusremotewrite:
+    endpoint: http://localhost:9090/api/v1/write
+    tls:
+      insecure: true
+  # export logs to grafana loki in otel format at http endpoint
+  otlphttp:
+    endpoint: http://localhost:3100/otlp
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/jaeger]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheusremotewrite]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp]
